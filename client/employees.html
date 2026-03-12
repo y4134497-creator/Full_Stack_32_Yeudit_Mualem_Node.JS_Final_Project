@@ -1,0 +1,195 @@
+<html lang="he" dir="rtl">
+  <head>
+    <title>Employees</title>
+    <link rel="stylesheet" href="./css.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="Form"> 
+      <nav class="custom-navbar">
+     <div class="nav-actions d-flex flex-column align-items-start gap-2"> 
+  <div id="welcomeMsg" class="mb-2"></div>
+  <button type="button" class="btn btn-primary btn-logout" onclick="logOut()">Log Out</button> 
+  <button type="button" class="btn btn-primary btn-logout" onclick="pageHome()">Page Home</button> 
+</div>
+      </nav>
+     
+      
+      <div>
+         <h2 class="text-center">Employees</h2>
+         <div class="floating-group">
+          <label class="floating-label">Filter by Department</label>
+          <br>
+          <select id="opDap" class="custom-select" onchange="filterEmpl()">
+            <option>All Departments</option> 
+          </select>
+         
+        </div>
+        <table
+          class="table table-striped table-hover table-bordered align-middle" border="1">
+          <thead class="text-center">
+              <tr>
+            <th>Employees</th>
+            <th>Departments</th>
+            <th>Shift</th>
+          </tr>
+          </thead class="text-center">
+        <tbody id="employeesBody"> </tbody>
+        </table>
+        <div class="text-center">
+         <button type="button" class="btn btn-primary" onclick="addEmployees()">Add New Employee</button> 
+        </div>
+        
+      </div>
+    </div>
+
+    <script>
+        if (typeof isAlreadyFetching === 'undefined') {
+        var isAlreadyFetching = false; 
+    }
+            window.onload = async function() {
+
+        const name = sessionStorage.getItem("userName");
+        const userId = sessionStorage.getItem('userId');
+        const tableBody = document.getElementById('employeesBody')
+        tableBody.innerHTML = "";
+        
+
+        if (name) {
+          document.getElementById("welcomeMsg").innerText = "Hello " + name;
+        }
+    
+       if (isAlreadyFetching) return;
+        isAlreadyFetching = true;
+        try {
+            const response = await fetch('http://localhost:3000/employees'
+                ,{
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+            } } )
+            if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+        if(response.ok){
+            const data = await response.json();
+            console.log(data);
+               
+
+            if (data && Array.isArray(data) && data.length > 0) {
+
+              data.forEach((dat)=>{
+                const row =document.createElement("tr")
+                const empTd = document.createElement("td")
+                const empLink = document.createElement("a")
+
+                empLink.href = `editEmployee.html?id=${dat._id}`
+                empLink.innerText = (dat.FirstName || dat.LastName)? (dat.FirstName || "") + " " + (dat.LastName || ""): "Unknown Name"
+                empTd.appendChild(empLink)
+                row.appendChild(empTd)
+
+                const depRow = document.createElement("td")
+                depRow.className = "dept-name";
+                const depLink = document.createElement("a")
+                depLink.href = `editDepartmen.html?id=${dat.DepartmentId}`
+                depLink.innerText = dat.DepartmentName ? dat.DepartmentName: "Unknown department"
+                depRow.appendChild(depLink)
+                row.appendChild(depRow)
+
+                const siftRow = document.createElement("td")
+                if (dat.Shifts && Array.isArray(dat.Shifts) && dat.Shifts.length > 0){
+                  const sftUl =document.createElement("ul")
+                  
+                  dat.Shifts.forEach((sft)=>{
+                    const cleanDate = sft.Date ? sft.Date.split('T')[0] : "";
+                    const sftLi = document.createElement("li")
+                    sftLi.innerText =" Date:" + " " + cleanDate  + " | " + "Starting Hour:" + " " + sft.StartingHour + " | " + "Ending Hour:" + " " + sft.EndingHour
+                    sftUl.appendChild(sftLi)
+                    siftRow.appendChild(sftUl)
+                  })
+                }else{
+                   siftRow.innerText ="Unknown Shifts"
+                }
+                row.appendChild(siftRow)
+                
+                tableBody.appendChild(row)
+                })
+          }
+            loadDep(userId)
+
+console.log("test", data[0].FirstName, data[0].LastName, data[0].DepartmentName);            
+            
+        }else{
+            alert('Error receiving data'); 
+        }
+        } catch (error) {
+            console.error(error);
+            alert('Error connecting to server')
+        }
+      }
+
+      const addEmployees=()=>{
+        window.location.href= "addEmployees.html"
+      }
+       const logOut=()=>{
+        sessionStorage.clear();
+        window.location.href= "login.html"
+      }
+      const pageHome=()=>{
+        window.location.href= "index.html"
+      }
+
+       async function loadDep (userId) {
+         const response = await fetch('http://localhost:3000/departments',{
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      } })
+      if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+        if(response.ok){
+            const data = await response.json();
+            console.log("Departments Array:", data);
+           
+       const option = document.getElementById("opDap")
+        if (data && Array.isArray(data) && data.length > 0){
+          data.forEach((dat)=>{
+        if(dat.Name){
+        const opt = document.createElement("option")
+        opt.innerText = dat.Name
+        opt.className ="option"
+        option.appendChild(opt)}
+      })
+    }
+    } else
+    option.innerText = "Unknown department"
+
+    }
+
+    function filterEmpl() {
+      const opSelect = document.getElementById("opDap").value
+      const tableRows = document.querySelectorAll("#employeesBody tr");
+      tableRows.forEach((row)=>{
+        const depCell = row.querySelector(".dept-name")   
+        if (depCell){
+          const depName =depCell.innerText.trim();
+         row.style.display = (opSelect === "All Departments" || opSelect === depName) ? "" : "none";
+        }
+
+      })
+    }
+    </script>
+  </body>
+</html>

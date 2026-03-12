@@ -1,0 +1,192 @@
+
+/* --- הגדרות כלליות --- */
+body {
+    background-color: #fdfdfd;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.Form {
+    width: 100%;
+    max-width: 1000px;
+    background: #fff;
+}
+
+/* --- כותרות ואלמנטים ויזואליים --- */
+h2 {
+    font-weight: 400;
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+    color: #102a43;
+    padding-right: 15px;
+}
+
+.form-label {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* --- ניווט עליון (Navbar) --- */
+.custom-navbar {
+    border-bottom: 2px solid #f0f4f8;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+}
+
+.nav-actions {
+    display: flex;
+    flex-direction: row-reverse; 
+    justify-content: space-between;
+    align-items: center;
+}
+
+#welcomeMsg {
+    font-size: 1rem;
+    color: #4a69bd;
+    font-weight: 600;
+}
+
+/* --- כפתורים (Buttons) --- */
+
+/* כפתור Logout */
+.btn-logout {
+    background-color: transparent !important;
+    color: #829ab1 !important;
+    border: 1px solid #d9e2ec !important;
+    font-size: 0.85rem !important;
+    padding: 5px 15px !important;
+    border-radius: 6px !important;
+}
+
+.btn-logout:hover {
+    background-color: #f0f4f8 !important;
+    color: #243b53 !important;
+}
+
+/* כפתורי מערכת ראשיים (Update/Delete וכו') */
+.btn-primary:not(.btn-logout) {
+    background-color: #102a43 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 10px 25px !important;
+    font-size: 0.9rem !important;
+    margin-top: 20px;
+    box-shadow: 0 4px 6px rgba(16, 42, 67, 0.1);
+    transition: all 0.2s ease;
+}
+
+.btn-primary:not(.btn-logout):hover {
+    background-color: #243b53 !important;
+    transform: translateY(-1px);
+}
+
+/* --- כפתורי בחירת משמרות (Checkboxes) --- */
+
+/* מצב רגיל (לא לחוץ) */
+.btn-outline-primary {
+    color: #102a43 !important;
+    border-color: #102a43 !important;
+    transition: all 0.2s;
+}
+
+/* מצב בחור (Checked) */
+.btn-check:checked + .btn-outline-primary {
+    background-color: #102a43 !important;
+    border-color: #102a43 !important;
+    color: #fff !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: #102a43 !important;
+    color: #fff !important;
+}
+
+/* --- סידור גריד למשמרות --- */
+#checkboxShift {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    max-width: 900px;
+    margin: 20px auto;
+}
+
+.option-wrapper {
+    flex: 0 0 calc(25% - 10px); /* 4 כפתורים בשורה */
+    min-width: 150px;
+}
+
+/* --- טפסים וקלט (Inputs) --- */
+.Form input.form-control {
+    max-width: 300px; 
+    margin: 0 auto;   
+}
+
+.custom-select {
+    font-size: 1rem;    
+    height: 35px;        
+    padding: 0 10px;    
+    border: 1px solid #d9e2ec;
+    background: #fff;
+    color: #334e68;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer; 
+    transition: border-color 0.2s;
+}
+
+.custom-select:focus {
+    border-color: #4a69bd;
+}
+
+/* --- טבלאות --- */
+.table {
+    border-collapse: collapse !important;
+    margin-top: 20px;
+    width: 100%;
+    border: none !important;
+    max-width: 900px; /* אופציונלי: מגביל את רוחב הטבלה כדי שלא תהיה ענקית */
+    margin-left: auto !important;  /* מרכוז - צד שמאל */
+    margin-right: auto !important; /* מרכוז - צד ימין */
+    
+}
+
+.table thead th {
+    background-color: #f0f4f8;
+    border-bottom: 2px solid #d9e2ec !important;
+    color: #486
+}
+.table td, .table th {
+    text-align: center !important; /* מרכוז אופקי */
+    vertical-align: middle !important; /* מרכוז אנכי - למקרה שיש שורות גבוהות */
+}
+
+.table td ul {
+    display: inline-block;
+    text-align: right;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+.btn-check:disabled + .btn {
+    background-color: #e9ecef !important; /* אפור בהיר */
+    border-color: #dee2e6 !important;     /* מסגרת אפורה */
+    color: #6c757d !important;            /* טקסט אפור */
+    opacity: 0.65;                        /* שקיפות ליצירת מראה מעומעם */
+    cursor: not-allowed;                  /* שינוי סמן העכבר לסימן "אין כניסה" */
+}
+/* --- טפסים וקלט (Inputs) --- */
+.Form input.form-control, 
+.form-control,           /* תופס את כל סוגי האינפוטים של בוטסטראפ */
+.custom-select, 
+select.form-control {    /* תופס גם את תיבות הבחירה */
+    max-width: 300px; 
+    margin: 0 auto;   
+    text-align: center;  /* השורה שמוסיפה את היישור למרכז */
+}

@@ -1,0 +1,191 @@
+<html lang="he" dir="rtl">
+  <head>
+    <title>Edit Shift</title>
+    <link rel="stylesheet" href="./css.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="Form"> 
+      <nav class="custom-navbar">
+          <div class="nav-actions d-flex flex-column align-items-start gap-2"> 
+  <div id="welcomeMsg" class="mb-2"></div>
+  <button type="button" class="btn btn-primary btn-logout" onclick="logOut()">Log Out</button> 
+  <button type="button" class="btn btn-primary btn-logout" onclick="pageHome()">Page Home</button> 
+</div>
+      </nav>
+     <h3 class="text-center">Edit Shift</h3>
+    <div>
+     <label class="form-label" >Date</label>
+     <input class="form-control w-50 mx-auto " id="inDate" required>
+    </div>
+    <div>
+     <label class="form-label" >Starting Hour</label>
+     <input type="number" class="form-control w-50 mx-auto " id="inStart" required>
+    </div>
+       <div>
+     <label class="form-label" >EndingHour</label>
+     <input type="number" class="form-control w-50 mx-auto " id="inEnd" required>
+    </div>
+   
+        <div>
+     <label class="form-label" >Employees:</label>
+  <div class="row g-2 text-center w-75 mx-auto"  id="checkboxEmployees">
+    </div>
+    <br>
+         <button type="button" class="btn btn-primary" onclick="Update()">Update</button> 
+         <button type="button" class="btn btn-primary" onclick="cancel()">Cancel </button> 
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const shiftId = urlParams.get('id');
+const userId = sessionStorage.getItem('userId');
+const name = sessionStorage.getItem("userName");
+let arrEmp = []
+
+
+window.onload= async function() {
+
+     if (name) {
+          document.getElementById("welcomeMsg").innerText = "Hello " + name;
+        }
+
+    try {
+        const shiftRes = await fetch(`http://localhost:3000/shifts/${shiftId}`, {
+            method: 'GET',
+            'Content-Type': 'application/json',
+            headers: { 'userid': userId }
+        });
+        if (shiftRes.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+        const currentShift = await shiftRes.json();
+        console.log("shift:", currentShift);
+        const assignedEmployeeIds = currentShift.Employees  || [];
+        
+        document.getElementById("inDate").value = (currentShift.Date) ? currentShift.Date.split('T')[0] : ""
+
+        if (currentShift.StartingHour || currentShift.EndingHour) {
+        document.getElementById("inStart").value = currentShift.StartingHour
+        document.getElementById("inEnd").value = currentShift.EndingHour
+    } else {
+        document.getElementById("inStart").value = ""
+        document.getElementById("inEnd").value = ""
+}
+        const response = await fetch('http://localhost:3000/employees', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+            }
+        });
+        if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+        if (response.ok) {
+            const data = await response.json();
+            const option = document.getElementById("checkboxEmployees");
+            option.innerHTML = "";
+
+            if (data && Array.isArray(data) && data.length > 0) {
+               data.forEach((dat, index) => {
+    const uniqueId = `btncheck-${index}`;
+    const opt = document.createElement("div");
+    opt.className = `option-wrapper`;
+const isAssigned = assignedEmployeeIds.some(id => id.toString() === dat._id.toString());
+const checkStatus = isAssigned ? "checked disabled" : "";
+const btnClass = isAssigned ? "btn btn-secondary disabled" : "btn btn-outline-primary";
+    opt.innerHTML = `
+    <input type="checkbox" class="btn-check" id="checkbox${dat._id}" autocomplete="off" 
+           value="${dat._id}" ${checkStatus} 
+           onchange="selectempl('${dat._id}', '${shiftId}')">
+    <label class="btn btn-outline-primary text-center w-100" for="checkbox${dat._id}">
+       <b>${dat.FirstName} ${dat.LastName}</b>
+    </label> `;
+    option.appendChild(opt);
+}); }}
+    } catch (error) {
+        console.error("Error fetching shifts:", error);
+    }
+}
+
+async function selectempl(empId, shiftId) {
+    const check = document.getElementById(`checkbox${empId}`); 
+      if (check.checked) {
+            arrEmp.push(empId)
+             alert("The employee was assigned to the shift.");
+             check.disabled = true;
+             check.onchange = null;
+            } else {
+            alert("Shifts cannot be deleted");
+            check.checked = true
+            }
+        } 
+
+async function Update() {
+        const userId = sessionStorage.getItem('userId')
+        const inDate = document.getElementById("inDate").value
+         const inStart = document.getElementById("inStart").value
+        const inEnd = document.getElementById("inEnd").value
+        
+        const updEmp = {
+      Date: inDate,
+      StartingHour: inStart,
+      EndingHour: inEnd,
+      Employees: arrEmp, 
+    }
+      
+      if(!inDate || !inStart || !inEnd ){
+        alert("Please fill in all required fields.");
+        return
+      } else{
+try {
+   const response = await fetch(`http://localhost:3000/shifts/${shiftId}`, {
+                method: 'PUT',
+               headers: { 
+                    'Content-Type': 'application/json',
+                    'userid': userId 
+                },
+             body: JSON.stringify(updEmp)
+            });
+            const postData = await response.json();
+            if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+       if(response.ok){
+            alert("Shift updated successfully!")
+            arrEmp = []
+            window.location.href = "shifts.html"
+      }else
+      alert("Error saving employee: " + response.statusText)
+} catch (error) {
+    console.error(error);
+    }
+}
+ }            
+ 
+      function cancel() {
+       window.history.back();
+    }
+
+  const logOut=()=>{
+        sessionStorage.clear();
+        window.location.href= "login.html"
+      }
+      const pageHome=()=>{
+        window.location.href= "index.html"
+      }
+</script>
+</body>
+</html>

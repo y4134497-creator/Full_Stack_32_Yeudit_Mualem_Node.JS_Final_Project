@@ -1,0 +1,108 @@
+<html lang="he" dir="rtl">
+  <head>
+    <title>Users </title>
+    <link rel="stylesheet" href="./css.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="Form"> 
+      <nav class="custom-navbar">
+           <div class="nav-actions d-flex flex-column align-items-start gap-2"> 
+  <div id="welcomeMsg" class="mb-2"></div>
+  <button type="button" class="btn btn-primary btn-logout" onclick="logOut()">Log Out</button> 
+  <button type="button" class="btn btn-primary btn-logout" onclick="pageHome()">Page Home</button> 
+</div>
+      </nav>
+     
+      
+      <div>
+         <h2 class="text-center">Users</h2>
+         
+        <table
+          class="table table-striped table-hover table-bordered align-middle" border="1">
+          <thead class="text-center">
+              <tr>
+            <th>Full Name</th>
+            <th>Allowed Actions</th>
+            <th>Current Actions for Today</th>
+          </tr>
+          </thead class="text-center">
+        <tbody id="usersBody"> </tbody>
+        </table>
+        <div class="text-center">
+         <button type="button" class="btn btn-primary" onclick="addShifts()">Cancel</button> 
+        </div>
+        
+      </div>
+    </div>
+
+    <script>
+       const name = sessionStorage.getItem("userName");
+        const userId = sessionStorage.getItem('userId');
+
+
+            window.onload = async function() {
+              const table = document.getElementById("usersBody")
+              const welcomeMsg = document.getElementById("welcomeMsg")
+              if (name) {
+        welcomeMsg.innerText = "Hello " + name;
+         }
+
+              try {
+                  const response = await fetch('http://localhost:3000/users',{
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      } })
+      if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+        if(response.ok){
+            const data = await response.json();
+            console.log("Users  Array:", data);
+
+            if (data && Array.isArray(data) && data.length > 0){
+            data.forEach((use) => {
+                const row = document.createElement("tr")
+                const tdFullName = document.createElement("td")
+                const tdActions = document.createElement("td")
+                const tdActionsToday = document.createElement("td")
+               
+                tdFullName.innerText = (use.FullName) ?  (use.FullName): "Unknown user"
+                tdActions.innerText = "100"
+                tdActionsToday.innerText = (use.NumOfActions) ?  (use.NumOfActions): "Actions finished"
+
+                row.appendChild(tdFullName)
+                row.appendChild(tdActions)
+                row.appendChild(tdActionsToday)
+                table.appendChild(row);  
+            })
+            }else{
+      alert("Error fetching users from server")
+    }}
+              } catch (error) {
+                console.error(error);
+              }
+      };
+
+      const addShifts=()=>{
+        window.location.href= "index.html"
+      }
+       const logOut=()=>{
+        sessionStorage.clear();
+        window.location.href= "login.html"
+      }
+      const pageHome=()=>{
+        window.location.href= "index.html"
+      }
+
+    </script>
+  </body>
+</html>

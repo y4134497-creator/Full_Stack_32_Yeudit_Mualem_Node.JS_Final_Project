@@ -1,0 +1,128 @@
+<html lang="he" dir="rtl">
+  <head>
+    <title>Department</title>
+    <link rel="stylesheet" href="./css.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="Form"> 
+      <nav class="custom-navbar">
+           <div class="nav-actions d-flex flex-column align-items-start gap-2"> 
+  <div id="welcomeMsg" class="mb-2"></div>
+  <button type="button" class="btn btn-primary btn-logout" onclick="logOut()">Log Out</button> 
+  <button type="button" class="btn btn-primary btn-logout" onclick="pageHome()">Page Home</button> 
+</div>
+      </nav>
+     
+      
+      <div>
+         <h2 class="text-center">Department</h2>
+         
+        <table
+          class="table table-striped table-hover table-bordered align-middle" border="1">
+          <thead class="text-center">
+              <tr>
+            <th>Departments</th>
+            <th>Manager</th>
+            <th>Employees</th>
+
+          </tr>
+          </thead class="text-center">
+        <tbody id="departmentsBody"> </tbody>
+        </table>
+        <div class="text-center">
+         <button type="button" class="btn btn-primary" onclick="addDepartments()">New Department</button> 
+        </div>
+        
+      </div>
+    </div>
+
+    <script>
+       const name = sessionStorage.getItem("userName");
+        const userId = sessionStorage.getItem('userId');
+
+
+            window.onload = async function() {
+                if (name) {
+          document.getElementById("welcomeMsg").innerText = "Hello " + name;
+        }
+              const table = document.getElementById("departmentsBody")
+              try {
+                  const response = await fetch('http://localhost:3000/departments',{
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      } })
+       if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+        if(response.ok){
+            const data = await response.json();
+            console.log("Departments Array:", data);
+
+            if (data && Array.isArray(data) && data.length > 0){
+            data.forEach((dep) => {
+                const row = document.createElement("tr")
+                const depTdName = document.createElement("td")
+                const depTdManager = document.createElement("td")
+                const depLinkName = document.createElement("a")
+               
+                depLinkName.href = `editDepartmen.html?id=${dep._id}`
+                depLinkName.innerText = (dep.Name) ?  (dep.Name): "Unknown Name"
+                depTdManager.innerText = (dep.ManagerName) ?  (dep.ManagerName): "Unknown Manager"
+                  depTdName.appendChild(depLinkName)
+                row.appendChild(depTdName)
+                row.appendChild(depTdManager)
+                 const depTdEmp = document.createElement("td")
+
+
+             if (dep.Employee && Array.isArray(dep.Employee) && dep.Employee.length > 0){
+                 const depUlEmp = document.createElement("ul")  
+                 dep.Employee.forEach((emp)=>  {
+                const depLiEmp = document.createElement("li")
+                const depLinkEmp = document.createElement("a")
+                depLinkEmp.href = `editEmployee.html?id=${emp.id}`
+                depLinkEmp.innerText = (emp.FullName) ?  (emp.FullName): "Unknown Employee"
+
+                depLiEmp.appendChild(depLinkEmp)
+                depUlEmp.appendChild(depLiEmp)
+              })
+                  depTdEmp.appendChild(depUlEmp)
+                  }else{
+                    depTdEmp.innerText="No employees"
+                  }
+                row.appendChild(depTdEmp)  
+                table.appendChild(row);    
+
+            })
+            }else {
+              alert("There are no departments")
+            }
+    }else{
+      alert("Error fetching departments")
+    }
+              } catch (error) {
+                console.error(error);
+              }
+      };
+
+      const addDepartments=()=>{
+        window.location.href= "addDepartments.html"
+      }
+       const logOut=()=>{
+        sessionStorage.clear();
+        window.location.href= "login.html"
+      }
+      const pageHome=()=>{
+        window.location.href= "index.html"
+      }
+    </script>
+  </body>
+</html>

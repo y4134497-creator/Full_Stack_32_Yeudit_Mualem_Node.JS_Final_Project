@@ -1,0 +1,130 @@
+<html lang="he" dir="rtl">
+  <head>
+    <title>Add Departmen</title>
+    <link rel="stylesheet" href="./css.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="Form"> 
+      <nav class="custom-navbar">
+            <div class="nav-actions d-flex flex-column align-items-start gap-2"> 
+  <div id="welcomeMsg" class="mb-2"></div>
+  <button type="button" class="btn btn-primary btn-logout" onclick="logOut()">Log Out</button> 
+  <button type="button" class="btn btn-primary btn-logout" onclick="pageHome()">Page Home</button> 
+</div>
+      </nav>
+     <h3 class="text-center">Add Departmen</h3>
+    <div>
+     <label class="form-label" >Departmen Name</label>
+     <input class="form-control w-50 mx-auto " id="inFMame" required>
+    </div>
+   
+    <div>
+     <label class="form-label" >Manager</label>
+          <select id="opManager" class="form-control w-50 mx-auto text-center"  required>
+            <option value="">Select Manager</option> 
+          </select>
+    </div>
+         <button type="button" class="btn btn-primary" onclick="save()">Save</button> 
+         <button type="button" class="btn btn-primary" onclick="cancel()">Cancel </button> 
+
+        <script>
+
+            window.onload= async function(){
+        const name = sessionStorage.getItem("userName");
+        const userId = sessionStorage.getItem('userId');
+        
+        if (name) {
+          document.getElementById("welcomeMsg").innerText = "Hello " + name;
+        }
+try {
+  const response = await fetch('http://localhost:3000/employees',{
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      } })
+      if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+        if(response.ok){
+            const data = await response.json();
+            console.log("Employees Array:", data);
+           
+       const option = document.getElementById("opManager")
+        if (data && Array.isArray(data) && data.length > 0){
+          data.forEach((dat)=>{
+        if(dat.FirstName){
+        const opt = document.createElement("option")
+        opt.innerText = `${dat.FirstName} ${dat.LastName}`
+        opt.value = dat._id
+        opt.className ="option"
+        option.appendChild(opt)}
+      })
+    }
+    } else
+    console.error("Failed to fetch employees")
+    } catch (error) {
+  console.error("Error:", error);
+}
+}     
+               
+    async function save() {
+        const userId = sessionStorage.getItem('userId')
+        const arrDep = {
+      Name: document.getElementById("inFMame").value,
+      Manager:  document.getElementById("opManager").value, 
+        }
+      
+      if(!arrDep.Name || !arrDep.Manager){
+        alert("Please fill in all required fields.");
+        return
+      } else{
+try {
+    const response = await fetch('http://localhost:3000/departments',{
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      },
+      body: JSON.stringify(arrDep)
+     })
+      if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+       if(response.ok){
+            alert("Departmen AddEmployee saved successfully!")
+            window.location.href = "department.html"
+      }else
+      console.log("Error saving department: " + response.statusText)
+} catch (error) {
+    console.error(error);
+    }
+console.log(arrDep);
+}
+ }            
+    function cancel() {
+              window.location.href= "department.html";
+
+    }
+      const logOut=()=>{
+        sessionStorage.clear();
+        window.location.href= "login.html"
+      }
+      const pageHome=()=>{
+        window.location.href= "index.html"
+      }
+
+        </script>
+        
+    </body>
+</html>

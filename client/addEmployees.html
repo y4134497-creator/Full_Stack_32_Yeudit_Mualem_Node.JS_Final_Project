@@ -1,0 +1,141 @@
+<html lang="he" dir="rtl">
+  <head>
+    <title>Add Employees</title>
+    <link rel="stylesheet" href="./css.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="Form"> 
+      <nav class="custom-navbar">
+            <div class="nav-actions d-flex flex-column align-items-start gap-2"> 
+  <div id="welcomeMsg" class="mb-2"></div>
+  <button type="button" class="btn btn-primary btn-logout" onclick="logOut()">Log Out</button> 
+  <button type="button" class="btn btn-primary btn-logout" onclick="pageHome()">Page Home</button> 
+</div>
+      </nav>
+     <h3 class="text-center">Add Employee</h3>
+    <div>
+     <label class="form-label" >First Name</label>
+     <input class="form-control w-50 mx-auto " id="inFMame" required>
+    </div>
+    <div>
+     <label class="form-label" >Last Name</label>
+     <input  class="form-control w-50 mx-auto " id="inMame" required>
+    </div>
+       <div>
+     <label class="form-label" >Start Work Year</label>
+     <input type="number" class="form-control w-50 mx-auto " id="inSWork" required>
+    </div>
+    <div>
+     <label class="form-label" >Department</label>
+          <select id="opDap" class="form-control w-50 mx-auto text-center"  required>
+            <option value="">Select Department</option> 
+          </select>
+    </div>
+         <button type="button" class="btn btn-primary" onclick="save()">Save</button> 
+         <button type="button" class="btn btn-primary" onclick="cancel()">Cancel </button> 
+
+        <script>
+
+            window.onload= async function(){
+        const name = sessionStorage.getItem("userName");
+        const userId = sessionStorage.getItem('userId');
+        
+        if (name) {
+          document.getElementById("welcomeMsg").innerText = "Hello " + name;
+        }
+
+         const response = await fetch('http://localhost:3000/departments',{
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      } })
+       if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+        if(response.ok){
+            const data = await response.json();
+            console.log("Departments Array:", data);
+           
+       const option = document.getElementById("opDap")
+        if (data && Array.isArray(data) && data.length > 0){
+          data.forEach((dat)=>{
+        if(dat.Name){
+        const opt = document.createElement("option")
+        opt.innerText = dat.Name
+        opt.value = dat._id
+        opt.className ="option"
+        option.appendChild(opt)}
+      })
+    }
+    } else
+    option.innerText = "Unknown department"
+
+    }
+            
+             
+            
+    async function save() {
+        const userId = sessionStorage.getItem('userId')
+const sWorkRaw = document.getElementById("inSWork").value
+        const sWorkYear = parseInt(sWorkRaw);
+        const arrDep = {
+      FirstName: document.getElementById("inFMame").value,
+      LastName: document.getElementById("inMame").value,
+      StartWorkYear:  sWorkRaw,
+      DepartmentId:  document.getElementById("opDap").value, 
+        }
+      
+      if(!arrDep.FirstName || !arrDep.LastName || !arrDep.StartWorkYear || !arrDep.DepartmentId){
+        alert("Please fill in all required fields.");
+        return
+      } else{
+try {
+    const response = await fetch('http://localhost:3000/employees',{
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      },
+      body: JSON.stringify(arrDep)
+     })
+      if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+       if(response.ok){
+            alert("Employee AddEmployee saved successfully!")
+            window.location.href = "employees.html"
+      }else
+      console.log("Error saving employee: " + response.statusText)
+} catch (error) {
+    console.error(error);
+    }
+console.log(arrDep);
+}
+ }            
+    function cancel() {
+              window.location.href= "employees.html";
+
+    }
+      const logOut=()=>{
+        sessionStorage.clear();
+        window.location.href= "login.html"
+      }
+      const pageHome=()=>{
+        window.location.href= "index.html"
+      }
+
+        </script>
+        
+    </body>
+</html>

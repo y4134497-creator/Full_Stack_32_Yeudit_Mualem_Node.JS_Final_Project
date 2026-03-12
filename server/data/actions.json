@@ -1,0 +1,70 @@
+{
+  "actions": [
+    {
+      "id": "6999f8a4570b4bf2c844152f",
+      "maxActions": 10,
+      "date": "1.3.2026",
+      "actionAllowd": 100
+    },
+    {
+      "id": "6999f8a4570b4bf2c844152f",
+      "maxActions": 10,
+      "date": "1.3.2026",
+      "actionAllowd": 99
+    },
+    {
+      "id": "6999f8a4570b4bf2c844152f",
+      "maxActions": 10,
+      "date": "1.3.2026",
+      "actionAllowd": 98
+    },
+    {
+      "id": "6999f8a4570b4bf2c844152f",
+      "maxActions": 10,
+      "date": "1.3.2026",
+      "actionAllowd": 97
+    },
+    {
+      "id": "6999f8a4570b4bf2c844152f",
+      "maxActions": 10,
+      "date": "1.3.2026",
+      "actionAllowd": 96
+    },
+    {
+      "id": "6999f8a4570b4bf2c844152f",
+      "maxActions": 10,
+      "date": "1.3.2026",
+      "actionAllowd": 95
+    },
+    {
+      "id": "6999f8a4570b4bf2c844152f",
+      "maxActions": 10,
+      "date": "1.3.2026",
+      "actionAllowd": 94
+    },
+    {
+      "id": "6999f8a4570b4bf2c844152f",
+      "maxActions": 10,
+      "date": "1.3.2026",
+      "actionAllowd": 3
+    },
+    {
+      "id": "6999f8a4570b4bf2c844152f",
+      "maxActions": 10,
+      "date": "1.3.2026",
+      "actionAllowd": 2
+    },
+    {
+      "id": "6999f8a4570b4bf2c844152f",
+      "maxActions": 10,
+      "date": "1.3.2026",
+      "actionAllowd": 1
+    },
+    {
+      "id": "6999f8a4570b4bf2c844152f",
+      "maxActions": 10,
+      "date": "1.3.2026",
+      "actionAllowd": 0
+    }
+  ]
+}

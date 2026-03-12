@@ -1,0 +1,257 @@
+<html lang="he" dir="rtl">
+  <head>
+    <title>Edit Department</title>
+    <link rel="stylesheet" href="./css.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="Form"> 
+      <nav class="custom-navbar">
+           <div class="nav-actions d-flex flex-column align-items-start gap-2"> 
+  <div id="welcomeMsg" class="mb-2"></div>
+  <button type="button" class="btn btn-primary btn-logout" onclick="logOut()">Log Out</button> 
+  <button type="button" class="btn btn-primary btn-logout" onclick="pageHome()">Page Home</button> 
+</div>
+      </nav>
+     <h3 class="text-center">Edit Department</h3>
+    <div>
+     <label class="form-label" >Departmen Name</label>
+     <input class="form-control w-50 mx-auto " id="inFMame" required>
+    </div>
+    <div>
+     <label class="form-label" >Manager</label>
+          <select id="opManager" class="form-control w-50 mx-auto text-center"  required>
+            <option value="">Select Manager</option> 
+          </select>
+    </div>
+    <div>
+  <label class="form-label">Employee</label>
+  <select id="opEmp" class="form-control w-50 mx-auto text-center" required>
+    <option value="">Select Employee</option> 
+  </select>
+  <button type="button" class="btn btn-primary" onclick="addEmployeeToDept()">Add Employee</button>
+</div>
+    <br>
+         <button type="button" class="btn btn-primary" onclick="Update()">Update</button> 
+         <button type="button" class="btn btn-primary" onclick="Delete()">Delete </button> 
+         <button type="button" class="btn btn-primary" onclick="cancel()">Cancel </button> 
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const departmentId = urlParams.get('id');
+const userId = sessionStorage.getItem('userId');
+const name = sessionStorage.getItem("userName");
+
+window.onload= async function(){
+    
+ if (name) {
+          document.getElementById("welcomeMsg").innerText = "Hello " + name;
+        }
+
+        try {
+             const response = await fetch('http://localhost:3000/employees',{
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      } })
+       if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+        if(response.ok){
+            const data = await response.json();
+            console.log("Employees Array:", data);
+           
+      const option = document.getElementById("opManager")
+      const option2 = document.getElementById("opEmp")
+
+        if (data && Array.isArray(data) && data.length > 0){
+          data.forEach((dat)=>{
+        if(dat.FirstName){
+        const opt = document.createElement("option")
+        opt.innerText = dat.FirstName + " " + (dat.LastName || "")
+        opt.value = dat._id
+        opt.className ="option"
+        option.appendChild(opt)}
+        if(dat.DepartmentId !== departmentId){
+          const opt = document.createElement("option")
+        opt.innerText = dat.FirstName
+        opt.value = dat._id
+        opt.className ="option"
+        option2.appendChild(opt)}
+        }
+      )}
+    }else{
+console.error("Error fetching employees list: " + response.statusText);
+        }
+if(departmentId){
+          const empResponse = await fetch(`http://localhost:3000/departments/${departmentId}` ,{
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+            } } )
+             if (empResponse.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+            if(empResponse.ok){
+            const data = await empResponse.json();
+            console.log("Department Data loaded", data);
+const deptName = data.Name || data.Departmen || "";
+document.getElementById("inFMame").value = deptName;
+if (data.Manager) {
+        document.getElementById("opManager").value = data.Manager;
+    }else {
+                console.error("Connection error: " + empResponse.statusText);
+            }
+          }  
+       }
+    }
+     catch (error) {
+            console.error(error);
+        }
+}
+
+
+async function Update() {
+        const userId = sessionStorage.getItem('userId')
+        const arrDep = {
+      Name: document.getElementById("inFMame").value,
+      Manager:  document.getElementById("opManager").value, 
+        }
+      
+      if(!arrDep.Name || !arrDep.Manager){
+        alert("Please fill in all required fields.");
+        return
+      } else{
+try {
+    const deptResponse = await fetch(`http://localhost:3000/departments/${departmentId}`,{
+                method: 'PUT',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      },
+      body: JSON.stringify(arrDep)
+     })
+      if (deptResponse.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+      if(!deptResponse.ok)
+     {
+      console.log("Error updating department: " + deptResponse.statusText);
+      return
+     }
+      
+       const updateData = {DepartmentId : departmentId}
+ const empResponse = await fetch(`http://localhost:3000/employees/${arrDep.Manager}`,{
+                method: 'put',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      },
+      body: JSON.stringify(updateData)
+     })
+      if (empResponse.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+       if(empResponse.ok){
+            alert("Department and Manager updated successfully!")
+            window.location.href = "department.html";
+        }  else
+        
+      alert("Department updated, but failed to update Manager's record.")
+      
+} catch (error) {
+    console.error(error);
+    alert("Server error during update.")
+    }
+console.log(arrDep);
+}
+ }            
+ async function Delete(){
+       if(departmentId){
+          const empResponse = await fetch(`http://localhost:3000/departments/${departmentId}` ,{
+                method: 'DELETE',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+            } } )
+             if (empResponse.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+        if(empResponse.ok){
+            const data = await empResponse.json();
+            console.log("Department Data:", data);
+             alert("Department deleted successfully!")
+             window.location.href = "department.html"
+            } else {
+            console.log("Error deleting department: " + empResponse.statusText); 
+        }
+      }
+}
+      const addEmployeeToDept = async () => {
+        const empId = document.getElementById("opEmp").value
+        if (!empId) {
+        alert("Please select an employee first");
+        return;
+    }
+    const updateData = {DepartmentId : departmentId}
+        try {
+    const response = await fetch(`http://localhost:3000/employees/${empId}`,{
+                method: 'put',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      },
+      body: JSON.stringify(updateData)
+     })
+      if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+       if(response.ok){
+            alert("The employee was updated to the department")
+            window.location.reload();
+      }else
+      console.log("Error assigning employee: " + response.statusText)
+} catch (error) {
+    console.error(error);
+    }
+      }
+
+
+      function cancel() {
+       window.history.back();
+    }
+
+  const logOut=()=>{
+        sessionStorage.clear();
+        window.location.href= "login.html"
+      }
+      const pageHome=()=>{
+        window.location.href= "index.html"
+      }
+
+</script>
+</body>
+</html>

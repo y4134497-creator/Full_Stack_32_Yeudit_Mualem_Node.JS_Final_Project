@@ -1,0 +1,114 @@
+<html lang="he" dir="rtl">
+  <head>
+    <title>Shifts</title>
+    <link rel="stylesheet" href="./css.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="Form"> 
+      <nav class="custom-navbar">
+            <div class="nav-actions d-flex flex-column align-items-start gap-2"> 
+  <div id="welcomeMsg" class="mb-2"></div>
+  <button type="button" class="btn btn-primary btn-logout" onclick="logOut()">Log Out</button> 
+  <button type="button" class="btn btn-primary btn-logout" onclick="pageHome()">Page Home</button> 
+</div>
+      </nav>
+     
+      
+      <div>
+         <h2 class="text-center">Shifts</h2>
+         
+        <table
+          class="table table-striped table-hover table-bordered align-middle" border="1">
+          <thead class="text-center">
+              <tr>
+            <th>Date</th>
+            <th>Starting Hour</th>
+            <th>Ending Hour</th>
+          </tr>
+          </thead class="text-center">
+        <tbody id="shiftsBody"> </tbody>
+        </table>
+        <div class="text-center">
+         <button type="button" class="btn btn-primary" onclick="addShifts()">New Shifts</button> 
+        </div>
+        
+      </div>
+    </div>
+
+    <script>
+       const name = sessionStorage.getItem("userName");
+        const userId = sessionStorage.getItem('userId');
+
+
+            window.onload = async function() {
+              const table = document.getElementById("shiftsBody")
+              const welcomeMsg = document.getElementById("welcomeMsg")
+              if (name) {
+        welcomeMsg.innerText = "Hello " + name;
+         }
+
+              try {
+                  const response = await fetch('http://localhost:3000/shifts',{
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                'userid': userId 
+      } })
+      if (response.status === 429) {
+            alert("Your daily action quota has been reached. You are being redirected to the login page.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+        if(response.ok){
+            const data = await response.json();
+            console.log("shifts Array:", data);
+
+            if (data && Array.isArray(data) && data.length > 0){
+            data.forEach((sft) => {
+                const row = document.createElement("tr")
+                const sftTdDate = document.createElement("td")
+                const sftTdDateLink = document.createElement("a")
+                const sftTdStart = document.createElement("td")
+                const sftTdEnd = document.createElement("td")
+               
+                sftTdDateLink.href = `editShifts.html?id=${sft._id}`
+                sftTdDateLink.innerText = (sft.Date) ?  (sft.Date.split('T')[0]): "Unknown Date"
+                sftTdStart.innerText = (sft.StartingHour) ?  (sft.StartingHour): "Unknown Starting Hour"
+                sftTdEnd.innerText = (sft.EndingHour) ?  (sft.EndingHour): "Unknown Ending Hour"
+
+
+                sftTdDate.appendChild(sftTdDateLink)
+                row.appendChild(sftTdDate)
+                row.appendChild(sftTdStart)
+                row.appendChild(sftTdEnd)
+                table.appendChild(row);  
+            })
+            }else {
+table.innerHTML = "<tr><td colspan='3' class='text-center'>There are no shifts available</td></tr>"            }
+    }else{
+      alert("Error fetching shifts from server")
+    }
+              } catch (error) {
+                console.error(error);
+              }
+      };
+
+      const addShifts=()=>{
+        window.location.href= "addShifts.html"
+      }
+       const logOut=()=>{
+        sessionStorage.clear();
+        window.location.href= "login.html"
+      }
+      const pageHome=()=>{
+        window.location.href= "index.html"
+      }
+
+    </script>
+  </body>
+</html>
